@@ -11,11 +11,11 @@ datasource db {
 }
 
 model Customer {
-  id       String @id
+  id       String  @id
   nome     String
-  email    String @unique
-  telefone String @unique
-  cpf      String @unique
-  credito  Int?
+  email    String  @unique
+  telefone String  @unique
+  cpf      String  @unique
+  plano    Boolean
   saldo    Int?
 }

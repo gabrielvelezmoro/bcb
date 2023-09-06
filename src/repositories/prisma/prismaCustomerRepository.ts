@@ -1,5 +1,11 @@
 import { PrismaService } from 'src/database/prisma.service';
-import { CustomerRepository } from '../customer-repository';
+import {
+  CustomerRepository,
+  IGetBalanceRequest,
+  IListAllResponse,
+  IUpdateBalanceRequest,
+  IGetBalanceResponse,
+} from '../customer-repository';
 import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 
@@ -13,25 +19,41 @@ export class PrismaCustomerRepository implements CustomerRepository {
     telefone,
     email,
     saldo,
-    credito,
+    plano,
   }: {
     nome: string;
     cpf: string;
     telefone: string;
     email: string;
     saldo: number;
-    credito: number;
+    plano: boolean;
   }): Promise<void> {
     await this.prisma.customer.create({
-      data: { id: randomUUID(), nome, email, telefone, cpf, credito, saldo },
+      data: { id: randomUUID(), nome, email, telefone, cpf, saldo, plano },
     });
   }
 
-  async get(telefone: string): Promise<Object> {
-    const customer = await this.prisma.customer.findUnique({
-      where: { telefone: telefone },
+  async listAll(): Promise<IListAllResponse[]> {
+    const customers = await this.prisma.customer.findMany();
+
+    return customers;
+  }
+
+  async getBalance(request: IGetBalanceRequest): Promise<IGetBalanceResponse> {
+    const result = await this.prisma.customer.findFirstOrThrow({
+      where: { id: request.id },
+      select: {
+        saldo: true,
+      },
     });
-    console.log(customer);
-    return customer;
+    return result;
+  }
+
+  async updateBalance(request: IUpdateBalanceRequest): Promise<void> {
+    console.log(request);
+    await this.prisma.customer.update({
+      data: { saldo: request.saldo },
+      where: { id: request.id },
+    });
   }
 }

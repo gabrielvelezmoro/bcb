@@ -5,15 +5,41 @@ export abstract class CustomerRepository {
     telefone,
     email,
     saldo,
-    credito,
+    plano,
   }: {
     nome: string;
     cpf: string;
     telefone: string;
     email: string;
     saldo: number;
-    credito: number;
+    plano: boolean;
   }): Promise<void>;
 
-  abstract get(telefone: string): Promise<Object>;
+  abstract listAll(): Promise<IListAllResponse[]>;
+
+  abstract getBalance(
+    request: IGetBalanceRequest,
+  ): Promise<IGetBalanceResponse>;
+
+  abstract updateBalance(request: IUpdateBalanceRequest): Promise<void>;
+}
+
+export interface IListAllResponse {
+  nome: string;
+  cpf: string;
+  telefone: string;
+  email: string;
+  saldo: number;
+  plano: boolean;
+}
+export interface IGetBalanceRequest {
+  id: string;
+}
+export interface IGetBalanceResponse {
+  saldo: number;
+}
+
+export interface IUpdateBalanceRequest {
+  saldo: number;
+  id: string;
 }

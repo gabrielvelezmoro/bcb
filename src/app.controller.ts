@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { CreateCustomerBody } from './dtos/create-customer-body';
 import { CustomerRepository } from './repositories/customer-repository';
 
@@ -8,21 +8,38 @@ export class AppController {
 
   @Post('customer')
   async createCustomer(@Body() body: CreateCustomerBody) {
-    const { nome, cpf, credito, email, saldo, telefone } = body;
+    const { nome, cpf, plano, email, saldo, telefone } = body;
     await this.customerRepository.create({
       nome,
       cpf,
-      credito,
+      plano,
       email,
       saldo,
       telefone,
     });
   }
 
-  @Get('customer')
-  async getCustomer(@Query() params) {
-    console.log(params);
-    const result = await this.customerRepository.get(params.telefone);
+  @Get('customer/all')
+  async listAllCustomers() {
+    const result = await this.customerRepository.listAll();
     return result;
+  }
+
+  @Get('customer/balance/:id')
+  async getCustomeBalance(@Param() param) {
+    const { id } = param;
+    const result = await this.customerRepository.getBalance({ id });
+    return result;
+  }
+
+  @Put('customer/add-credit/:id')
+  async addCredit(@Param() param, @Body() body) {
+    const { id } = param;
+    const { credito } = body;
+    const { saldo } = await this.customerRepository.getBalance({ id });
+
+    const novoValor = saldo + credito;
+
+    await this.customerRepository.updateBalance({ id, saldo: novoValor });
   }
 }

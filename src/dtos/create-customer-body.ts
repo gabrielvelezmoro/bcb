@@ -16,7 +16,7 @@ export class CreateCustomerBody {
   @IsNotEmpty({ message: 'CPF obrigatório.' })
   cpf: string;
 
-  credito: number;
+  plano: boolean;
 
   saldo: number;
 }
