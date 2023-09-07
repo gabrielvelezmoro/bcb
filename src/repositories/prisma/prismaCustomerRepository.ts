@@ -7,6 +7,8 @@ import {
   IGetBalanceResponse,
   IGetCustomerRequest,
   IGetCustomerResponse,
+  IGetCustomerByNumberRequest,
+  IGetCustomerByNumberResponse,
 } from '../customer-repository';
 import { randomUUID } from 'node:crypto';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
@@ -36,7 +38,9 @@ export class PrismaCustomerRepository implements CustomerRepository {
   }
 
   async listAll(): Promise<IListAllResponse[]> {
-    const customers = await this.prisma.customer.findMany();
+    const customers = await this.prisma.customer.findMany().catch(() => {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    });
 
     return customers;
   }
@@ -67,9 +71,26 @@ export class PrismaCustomerRepository implements CustomerRepository {
   async getCustomer(
     request: IGetCustomerRequest,
   ): Promise<IGetCustomerResponse> {
-    const result = await this.prisma.customer.findFirstOrThrow({
-      where: { id: request.id },
-    });
+    const result = await this.prisma.customer
+      .findFirstOrThrow({
+        where: { id: request.id },
+      })
+      .catch(() => {
+        throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      });
+    return result;
+  }
+
+  async getCustomerByNumber(
+    request: IGetCustomerByNumberRequest,
+  ): Promise<IGetCustomerByNumberResponse> {
+    const result = await this.prisma.customer
+      .findFirstOrThrow({
+        where: { telefone: request.telefone },
+      })
+      .catch(() => {
+        throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      });
     return result;
   }
 }

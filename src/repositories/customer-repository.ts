@@ -25,6 +25,9 @@ export abstract class CustomerRepository {
   abstract getCustomer(
     request: IGetCustomerRequest,
   ): Promise<IGetCustomerResponse>;
+  abstract getCustomerByNumber(
+    request: IGetCustomerByNumberRequest,
+  ): Promise<IGetCustomerByNumberResponse>;
 }
 
 export interface IListAllResponse {
@@ -58,4 +61,12 @@ export interface IGetCustomerResponse {
   email: string;
   saldo: number;
   plano: boolean;
+}
+
+export interface IGetCustomerByNumberRequest {
+  telefone: string;
+}
+
+export interface IGetCustomerByNumberResponse {
+  cpf: string;
 }

@@ -50,4 +50,17 @@ export class AppController {
     const result = await this.customerRepository.getCustomer({ id });
     return result;
   }
+
+  @Post('sms/send')
+  async sendSms(@Body() body: CreateCustomerBody) {
+    const { nome, cpf, plano, email, saldo, telefone } = body;
+    await this.customerRepository.create({
+      nome,
+      cpf,
+      plano,
+      email,
+      saldo,
+      telefone,
+    });
+  }
 }
