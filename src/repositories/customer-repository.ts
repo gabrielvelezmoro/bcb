@@ -22,6 +22,9 @@ export abstract class CustomerRepository {
   ): Promise<IGetBalanceResponse>;
 
   abstract updateBalance(request: IUpdateBalanceRequest): Promise<void>;
+  abstract getCustomer(
+    request: IGetCustomerRequest,
+  ): Promise<IGetCustomerResponse>;
 }
 
 export interface IListAllResponse {
@@ -42,4 +45,17 @@ export interface IGetBalanceResponse {
 export interface IUpdateBalanceRequest {
   saldo: number;
   id: string;
+}
+
+export interface IGetCustomerRequest {
+  id: string;
+}
+
+export interface IGetCustomerResponse {
+  nome: string;
+  cpf: string;
+  telefone: string;
+  email: string;
+  saldo: number;
+  plano: boolean;
 }

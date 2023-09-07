@@ -5,9 +5,11 @@ import {
   IListAllResponse,
   IUpdateBalanceRequest,
   IGetBalanceResponse,
+  IGetCustomerRequest,
+  IGetCustomerResponse,
 } from '../customer-repository';
 import { randomUUID } from 'node:crypto';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class PrismaCustomerRepository implements CustomerRepository {
@@ -40,12 +42,17 @@ export class PrismaCustomerRepository implements CustomerRepository {
   }
 
   async getBalance(request: IGetBalanceRequest): Promise<IGetBalanceResponse> {
-    const result = await this.prisma.customer.findFirstOrThrow({
-      where: { id: request.id },
-      select: {
-        saldo: true,
-      },
-    });
+    const result = await this.prisma.customer
+      .findFirstOrThrow({
+        where: { id: request.id },
+        select: {
+          saldo: true,
+        },
+      })
+      .catch(() => {
+        throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      });
+
     return result;
   }
 
@@ -55,5 +62,14 @@ export class PrismaCustomerRepository implements CustomerRepository {
       data: { saldo: request.saldo },
       where: { id: request.id },
     });
+  }
+
+  async getCustomer(
+    request: IGetCustomerRequest,
+  ): Promise<IGetCustomerResponse> {
+    const result = await this.prisma.customer.findFirstOrThrow({
+      where: { id: request.id },
+    });
+    return result;
   }
 }

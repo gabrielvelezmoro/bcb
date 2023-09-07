@@ -26,9 +26,10 @@ export class AppController {
   }
 
   @Get('customer/balance/:id')
-  async getCustomeBalance(@Param() param) {
+  async getCustomerBalance(@Param() param) {
     const { id } = param;
     const result = await this.customerRepository.getBalance({ id });
+
     return result;
   }
 
@@ -41,5 +42,12 @@ export class AppController {
     const novoValor = saldo + credito;
 
     await this.customerRepository.updateBalance({ id, saldo: novoValor });
+  }
+
+  @Get('customer/:id')
+  async getCustomer(@Param() param) {
+    const { id } = param;
+    const result = await this.customerRepository.getCustomer({ id });
+    return result;
   }
 }
