@@ -1,10 +1,24 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { CreateCustomerBody } from './dtos/create-customer-body';
 import { CustomerRepository } from './repositories/customer-repository';
+import { SendSmsBody } from './dtos/send-sms-body';
+import { SmsRepository } from './repositories/sms-repository';
 
 @Controller('api')
 export class AppController {
-  constructor(private customerRepository: CustomerRepository) {}
+  constructor(
+    private customerRepository: CustomerRepository,
+    private smsRepository: SmsRepository,
+  ) {}
 
   @Post('customer')
   async createCustomer(@Body() body: CreateCustomerBody) {
@@ -52,15 +66,61 @@ export class AppController {
   }
 
   @Post('sms/send')
-  async sendSms(@Body() body: CreateCustomerBody) {
-    const { nome, cpf, plano, email, saldo, telefone } = body;
-    await this.customerRepository.create({
-      nome,
-      cpf,
-      plano,
-      email,
-      saldo,
-      telefone,
-    });
+  async sendSms(@Body() body: SendSmsBody) {
+    const { remetente, destinatario, whatsapp, texto } = body;
+
+    await this.customerRepository
+      .getCustomerByNumber({
+        telefone: destinatario,
+      })
+      .catch(() => {
+        throw new HttpException(
+          'Destinatario não encontrado',
+          HttpStatus.FORBIDDEN,
+        );
+      });
+
+    const remetenteData = await this.customerRepository
+      .getCustomerByNumber({
+        telefone: remetente,
+      })
+      .catch(() => {
+        throw new HttpException(
+          'Remetente não encontrado',
+          HttpStatus.FORBIDDEN,
+        );
+      });
+
+    if (!remetenteData.plano && remetenteData.saldo < 0.25) {
+      throw new HttpException('Saldo insuficiente', HttpStatus.FORBIDDEN);
+    }
+
+    const destinatarioData = await this.customerRepository
+      .getCustomerByNumber({
+        telefone: destinatario,
+      })
+      .catch(() => {
+        throw new HttpException(
+          'Destinatario não encontrado',
+          HttpStatus.FORBIDDEN,
+        );
+      });
+
+    //envia sms
+
+    this.smsRepository
+      .sendSms({
+        idRemetente: remetenteData.id,
+        idDestinatario: destinatarioData.id,
+        texto,
+        whatsapp,
+      })
+      .then(() => {
+        this.customerRepository.updateBalance({
+          id: remetenteData.id,
+          saldo: remetenteData.saldo - 25,
+        });
+      });
+    //abate do saldo
   }
 }

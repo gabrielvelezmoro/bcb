@@ -19,3 +19,11 @@ model Customer {
   plano    Boolean
   saldo    Int?
 }
+
+model Sms {
+  id              String  @id
+  id_remetente    String
+  id_destinatario String
+  whatsapp        Boolean
+  texto           String
+}

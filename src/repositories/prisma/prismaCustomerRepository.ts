@@ -61,7 +61,6 @@ export class PrismaCustomerRepository implements CustomerRepository {
   }
 
   async updateBalance(request: IUpdateBalanceRequest): Promise<void> {
-    console.log(request);
     await this.prisma.customer.update({
       data: { saldo: request.saldo },
       where: { id: request.id },
@@ -84,13 +83,20 @@ export class PrismaCustomerRepository implements CustomerRepository {
   async getCustomerByNumber(
     request: IGetCustomerByNumberRequest,
   ): Promise<IGetCustomerByNumberResponse> {
-    const result = await this.prisma.customer
-      .findFirstOrThrow({
-        where: { telefone: request.telefone },
-      })
-      .catch(() => {
-        throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-      });
+    if (!request.isEnvio) {
+      const result = await this.prisma.customer
+        .findFirstOrThrow({
+          where: { telefone: request.telefone },
+        })
+        .catch(() => {
+          throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+        });
+      return result;
+    }
+    const result = await this.prisma.customer.findFirstOrThrow({
+      where: { telefone: request.telefone },
+    });
+
     return result;
   }
 }

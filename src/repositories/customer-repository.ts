@@ -65,8 +65,15 @@ export interface IGetCustomerResponse {
 
 export interface IGetCustomerByNumberRequest {
   telefone: string;
+  isEnvio?: boolean;
 }
 
 export interface IGetCustomerByNumberResponse {
+  id: string;
+  nome: string;
   cpf: string;
+  telefone: string;
+  email: string;
+  saldo: number;
+  plano: boolean;
 }
